@@ -4,10 +4,6 @@ Diezyweb
 > "Take a different look at your hard drive"
 
 
-![Screenshot](https://raw.github.com/jimmywarting/diezyweb/gh-pages/screenshot.png "Screenshot")
-
-#### [DEMO](http://jimmywarting.github.io/diezyweb/)
-
 I wanted to learn some of d3.js to see what's like but didn't know what i would do. So I got inspired by [DaisyDisk](http://daisydiskapp.com/ "DaisyDisk") which analyzes you hard disk and tells you what's taking up all the space. And its WAY better then this
 
 Browsers are now capitable of reading folders! (chrome at least) So it sould be possible to make the same kind of app in the browser without haveing to download anything.
@@ -32,3 +28,15 @@ After that we need to create a hierarchy from the Filelist-array to get somethin
 	]
 
 	preview( toHierarchy(files) ); // boom done!
+
+
+
+__________________________________________________________________
+
+### TODO:
+
+it has some performence issue when selecting > 10 000 files
+
+* needs a faster way to create a hierarchy? use d3.nest() somehow?
+* only show n number of circels
+* remove hidden <path> from the DOM when not needed
