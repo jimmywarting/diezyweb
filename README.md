@@ -18,7 +18,7 @@ This will let you select a folder and read all the files in it
 
 	<input type=file webkitDirectory>
 
-*Note: it's might be possible to use [drag-n-drop](http://updates.html5rocks.com/2012/07/Drag-and-drop-a-folder-onto-Chrome-now-available) to tarket more browsers like firefox and maybe even IE but I will stick to chromes simple webkitDirectory attribute for the simplisity of this demo*
+*Note: it's might be possible to use [drag-n-drop](http://updates.html5rocks.com/2012/07/Drag-and-drop-a-folder-onto-Chrome-now-available) to target more browsers like firefox and maybe even IE but I will stick to chromes simple webkitDirectory attribute for the simplisity of this demo*
 
 After that we need to create a hierarchy from the Filelist-array to get something d3js [wants](https://github.com/mbostock/d3/wiki/Hierarchy-Layout#wiki-children) and understands.
 
