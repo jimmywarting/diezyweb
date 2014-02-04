@@ -4,6 +4,9 @@ Diezyweb
 > "Take a different look at your hard drive"
 
 
+![Screenshot](https://raw.github.com/jimmywarting/diezyweb/gh-pages/screenshot.png "Screenshot")
+
+
 I wanted to learn some of d3.js to see what's like but didn't know what i would do. So I got inspired by [DaisyDisk](http://daisydiskapp.com/ "DaisyDisk") which analyzes you hard disk and tells you what's taking up all the space. And its WAY better then this
 
 Browsers are now capitable of reading folders! (chrome at least) So it sould be possible to make the same kind of app in the browser without haveing to download anything.
