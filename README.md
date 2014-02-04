@@ -43,4 +43,4 @@ it has some performence issue when selecting > 10 000 files
 
 * needs a faster way to create a hierarchy? use d3.nest() somehow?
 * only show n number of circels
-* remove hidden <path> from the DOM when not needed
+* remove hidden 'path' from the DOM when not needed
