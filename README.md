@@ -6,6 +6,7 @@ Diezyweb
 
 ![Screenshot](https://raw.github.com/jimmywarting/diezyweb/gh-pages/screenshot.png "Screenshot")
 
+#### [DEMO](http://jimmywarting.github.io/diezyweb/)
 
 I wanted to learn some of d3.js to see what's like but didn't know what i would do. So I got inspired by [DaisyDisk](http://daisydiskapp.com/ "DaisyDisk") which analyzes you hard disk and tells you what's taking up all the space. And its WAY better then this
 
