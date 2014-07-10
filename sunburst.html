@@ -3,6 +3,8 @@
 	<meta charset="utf-8">
 
 	<style>
+		@import url(afilepicker.css);
+
 		[ng-click]{
 			cursor: pointer;
 		}
@@ -21,11 +23,7 @@
 			background: gainsboro;
 		}
 		.clearfix:after {
-				clear:both;
-		}
-		/* For IE 6/7 (trigger hasLayout) */
-		.clearfix {
-				zoom:1;
+			clear:both;
 		}
 
 		svg{
@@ -79,20 +77,20 @@
 			color:red;
 		}
 	</style>
-	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.11/angular.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.19/angular.min.js"></script>
 	<script src="http://d3js.org/d3.v3.min.js"></script>
 
 </head>
-<body ng-app="wis">
+<body ng-app="wis" ng-controller="ListCtrl as list">
 
-	<input id="input" type="file" webkitDirectory>
-
-	<div ng-controller="ListCtrl as list">
+	<button a-file-picker ng-change="list.oninput()" ng-model="list.files">Select some files</button>
+	<div>
 
 		<nav class="clearfix" id="breadcrumb">
 			<a ng-repeat="item in list.path(list.data)" ng-click="list.click(item)">
 				<!-- <span ng-if="$index==0">{{item.path}}</span> -->
-				<span>{{item.name}}</span>
+				<span ng-if="$first">/</span>
+				<span ng-if="!$first">{{item.name}}</span>
 			</a>
 		</nav>
 
@@ -101,13 +99,14 @@
 			ng-class="{folder: !!item.children}"
 			ng-click="list.click(item)"
 			title="{{item.path}}"
-			>{{item.name}} <span>{{item.value | filesize}}</span></li></ul>
+		>{{item.name}} <span>{{item.value | filesize}}</span></li></ul>
 
 	</div><!-- List controll -->
 
 
+	<script src="afilepicker.js"></script>
 	<script>
-	var app = angular.module("wis", []);
+	var app = angular.module("wis", ['aFilePicker']);
 
 	// Returns human friendly file size
 	app.filter('filesize', function () {
@@ -133,6 +132,8 @@
 				path.unshift(depth);
 			} while (depth = depth.parent);
 
+			path.unshift();
+
 			return path;
 		};
 
@@ -145,16 +146,14 @@
 			List.data = d;
 		}
 
-		// Read all the entries -> create a hierarchy -> preview
-		input.onchange = function () {
-			var files = input.files,
+		List.oninput = function() {
+			var files = List.files,
 				i = 0,
 				len = files.length,
 				json = [];
-
 			for (; i < len; i++) {
 				json.push({
-					path: files[i].webkitRelativePath,
+					path: files[i].relativePath,
 					name: files[i].name,
 					size: files[i].name == "." ? 0 : files[i].size,
 					type: files[i].type
@@ -162,11 +161,10 @@
 			}
 
 			// clear cache
-			input.value = "";
+			List.files = [];
 			files = null;
 
 			preview(toHierarchy(json));
-			$scope.$apply(); // Let angular know that stuff has changed
 		};
 
 		// turns a array into this: https://github.com/mbostock/d3/wiki/Hierarchy-Layout#wiki-children
@@ -247,6 +245,7 @@
 			List.svg = svg.selectAll("path")
 				.data(partition.nodes(root))
 				.enter().append("path")
+			    .attr("class", function(d) { return "ring_" + d.depth; })
 				.attr("d", arc)
 				.style("fill", function (d) { return color((d.children ? d : d.parent).name); })
 				.on("click", function (d) {
