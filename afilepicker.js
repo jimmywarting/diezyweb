@@ -50,7 +50,7 @@ angular.module("aFilePicker", [])
 
 
 	function messageHandler(event) {
-		if(event.data.status == 200){
+		if(event.data.status == 200 || event.data.status == 204){
 			enable_scroll();
 			className(aFilePicker, 'picker-hide');
 			defered.resolve(event.data.detail);
@@ -77,7 +77,6 @@ angular.module("aFilePicker", [])
 						eventName: "aFilePicker::init",
 						version: "v1"
 					}
-
 
 					// Try using MessageChannel first of all
 					if(win.MessageChannel){
@@ -158,7 +157,7 @@ angular.module("aFilePicker", [])
 			$element.on('click', function(){
 
 				aFilePicker.pick({
-					responseType: "blob", //["image", "video", "audio", "blob", "meta", "base64", "dataURL", "arrayBuffer", "text", "binary", "binary-utf8", "json", "document"]
+					responseType: "meta", //["image", "video", "audio", "blob", "file", "meta", "base64", "dataURL", "arrayBuffer", "text", "binary", "binary-utf8", "json", "document"]
 					mimeType: "*/*",
 					zipIt: false,
 					extension: undefined,
