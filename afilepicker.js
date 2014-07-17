@@ -10,6 +10,7 @@ angular.module("aFilePicker", [])
 		doc = document,
 		usingMsgChannel = !!win.MessageChannel,
 		defered,
+		emit,
 		aFilePicker,
 		aFileDialog;
 
@@ -48,14 +49,21 @@ angular.module("aFilePicker", [])
 	    window.onmousewheel = document.onmousewheel = null;
 	}
 
+	var curr, len, arr;
 
 	function messageHandler(event) {
-		if(event.data.status == 200 || event.data.status == 204){
-			enable_scroll();
-			className(aFilePicker, 'picker-hide');
-			defered.resolve(event.data.detail);
-			event.target.removeEventListener(messageHandler);
-		}
+
+		if(event.data.eventName == "aFilePicker::close") {
+
+			if(event.data.status == 200 || event.data.status == 204){
+				enable_scroll();
+				className(aFilePicker, 'picker-hide');
+				defered.resolve(event.data.detail);
+			}
+
+		};
+
+
 	}
 
 	function createChannel(){
@@ -86,15 +94,26 @@ angular.module("aFilePicker", [])
 						aFileDialog.contentWindow.postMessage(message, origin, [mc.port2]);
 
 						// Set up our port event listener.
-						mc.port1.addEventListener('message', messageHandler, false);
+						mc.port1.onmessage = messageHandler;
 
 						// Open the port
 						mc.port1.start();
-					} else {
-						message.channel = "aFilePicker_" + (+new Date);
 
+						emit = function (msg) {
+							msg.version = "v1";
+							mc.port1.postMessage(msg);
+						}
+					} else {
+						var channel = "aFilePicker_" + (+new Date);
 				    	// initialize the picker option
-						aFileDialog.contentWindow.postMessage(message, origin);
+
+						emit = function (msg) {
+							msg.version = "v1";
+							msg.channel = channel;
+							aFileDialog.contentWindow.postMessage(msg, origin);
+						}
+
+						emit(message);
 
 						// Set up our event listener.
 						window.addEventListener('message', function(event) {
@@ -119,9 +138,6 @@ angular.module("aFilePicker", [])
 					className(aFilePicker, "pulse", aFilePicker.offsetWidth);
 				}
 			}, document.body));
-
-
-			// aFileDialog.webkitRequestFullscreen();
 
 		} else {
 			className(aFilePicker);

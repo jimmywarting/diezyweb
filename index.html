@@ -84,7 +84,7 @@
 </head>
 <body ng-app="wis" ng-controller="ListCtrl as list">
 
-	<button a-file-picker ng-change="list.oninput()" ng-model="list.files">Select some files</button>
+	<button autofocus a-file-picker ng-change="list.oninput()" ng-model="list.files">Select some files</button>
 	<div>
 
 		<nav class="clearfix" id="breadcrumb">
@@ -106,7 +106,9 @@
 
 	<script>
 	var app = angular.module("wis", ['aFilePicker']);
-
+	var foo = function(msg){
+		alert(1);
+	}
 	// Returns human friendly file size
 	app.filter('filesize', function () {
 		return function (size) {
@@ -162,7 +164,7 @@
 			// clear cache
 			List.files = [];
 			files = null;
-
+			return;
 			preview(toHierarchy(json));
 		};
 
