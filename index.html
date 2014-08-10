@@ -84,7 +84,7 @@
 </head>
 <body ng-app="wis" ng-controller="ListCtrl as list">
 
-	<button autofocus a-file-picker ng-change="list.oninput()" ng-model="list.files">Select some files</button>
+	<button autofocus a-file-picker="List.pickerOption" ng-change="list.oninput()" ng-model="list.files">Select some files</button>
 	<div>
 
 		<nav class="clearfix" id="breadcrumb">
@@ -106,21 +106,29 @@
 
 	<script>
 	var app = angular.module("wis", ['aFilePicker']);
-	var foo = function(msg){
-		alert(1);
-	}
+
 	// Returns human friendly file size
 	app.filter('filesize', function () {
-		return function (size) {
-			if (size >= 1073741824) return Math.round(size / 1073741824, 1) + " GB";
-			if (size >= 1048576) return Math.round(size / 1048576, 1) + " MB";
-			if (size >= 1024) return Math.round(size / 1024, 1) + " KB";
-			return size + " b";
-		};
+		return 	function (size){
+			for(var i = 0, unit = 'Byte0KB0MB0GB0TB0PB0EB0ZB0YB'.split(0);
+				1024 <= size; // While the size is smaller
+				i++
+			) size /= 1024;
+
+			return size ? (size+.5|0) + ' ' + unit[i] : '--' // jshint ignore:line
+		}
 	});
 
 	function ListCtrl($scope) {
 		var List = this;
+
+		List.pickerOption = {
+			mimetype: '*/*',
+			responseType: 'meta',
+			maxFiles: '8000',
+			directory: true,
+			minFileSize: 100
+		}
 
 		// Returns the path by travling upwords from the current node
 		List.path = function (root) {
@@ -142,13 +150,13 @@
 		List.click = function (d) {
 			List.svg.transition()
 				.duration(750)
-				.attrTween("d", arcTween(d));
+				.attrTween("d", List.arcTween(d));
 
 			List.data = d;
 		}
 
 		List.oninput = function() {
-			var files = List.files,
+			var files = List.files || [],
 				i = 0,
 				len = files.length,
 				json = [];
@@ -164,8 +172,7 @@
 			// clear cache
 			List.files = [];
 			files = null;
-
-			preview(toHierarchy(json));
+			init(toHierarchy(json));
 		};
 
 		// turns a array into this: https://github.com/mbostock/d3/wiki/Hierarchy-Layout#wiki-children
@@ -214,39 +221,40 @@
 			return tree;
 		};
 
+		function init(root){
+			angular.element(document.querySelectorAll('svg')).remove();
 
-		var width = 700,
-			height = 700,
-			radius = Math.min(width, height) / 2;
+			var width = 700,
+				height = 700,
+				radius = Math.min(width, height) / 2;
 
-		var x = d3.scale.linear()
-			.range([0, 2 * Math.PI]);
+			var x = d3.scale.linear()
+				.range([0, 2 * Math.PI]);
 
-		var y = d3.scale.sqrt()
-			.range([0, radius]);
+			var y = d3.scale.sqrt()
+				.range([0, radius]);
 
-		var color = d3.scale.category20c();
+			var color = d3.scale.category20c();
 
-		var svg = d3.select("body").append("svg")
-			.attr("width", width)
-			.attr("height", height)
-			.append("g")
-			.attr("transform", "translate(" + width / 2 + "," + (height / 2 + 10) + ")");
+			var svg = d3.select("body").append("svg")
+				.attr("width", width)
+				.attr("height", height)
+				.append("g")
+				.attr("transform", "translate(" + width / 2 + "," + (height / 2 + 10) + ")");
 
-		var partition = d3.layout.partition()
-			.value(function (d) { return d.size; });
+			var partition = d3.layout.partition()
+				.value(function (d) { return d.size; });
 
-		var arc = d3.svg.arc()
-			.startAngle(function (d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x))); })
-			.endAngle(function (d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x + d.dx))); })
-			.innerRadius(function (d) { return Math.max(0, y(d.y)); })
-			.outerRadius(function (d) { return Math.max(0, y(d.y + d.dy)); });
+			var arc = d3.svg.arc()
+				.startAngle(function (d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x))); })
+				.endAngle(function (d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x + d.dx))); })
+				.innerRadius(function (d) { return Math.max(0, y(d.y)); })
+				.outerRadius(function (d) { return Math.max(0, y(d.y + d.dy)); });
 
-		function preview(root) {
 			List.svg = svg.selectAll("path")
 				.data(partition.nodes(root))
 				.enter().append("path")
-			    .attr("class", function(d) { return "ring_" + d.depth; })
+				.attr("class", function(d) { return "ring_" + d.depth; })
 				.attr("d", arc)
 				.style("fill", function (d) { return color((d.children ? d : d.parent).name); })
 				.on("click", function (d) {
@@ -255,27 +263,24 @@
 				});
 
 
-			List.data = root;
-		};
 
+			d3.select(self.frameElement).style("height", height + "px");
 
-
-		d3.select(self.frameElement).style("height", height + "px");
-
-		// Interpolate the scales!
-		function arcTween(d) {
-			var xd = d3.interpolate(x.domain(), [d.x, d.x + d.dx]),
-				yd = d3.interpolate(y.domain(), [d.y, 1]),
-				yr = d3.interpolate(y.range(), [d.y ? 20 : 0, radius]);
-			return function (d, i) {
-				return i ? function (t) {
-					return arc(d);
-				} : function (t) {
-					x.domain(xd(t));
-					y.domain(yd(t)).range(yr(t));
-					return arc(d);
+			// Interpolate the scales!
+			List.arcTween = function (d) {
+				var xd = d3.interpolate(x.domain(), [d.x, d.x + d.dx]),
+					yd = d3.interpolate(y.domain(), [d.y, 1]),
+					yr = d3.interpolate(y.range(), [d.y ? 20 : 0, radius]);
+				return function (d, i) {
+					return i ? function (t) {
+						return arc(d);
+					} : function (t) {
+						x.domain(xd(t));
+						y.domain(yd(t)).range(yr(t));
+						return arc(d);
+					};
 				};
-			};
+			}
 		}
 
 	}
