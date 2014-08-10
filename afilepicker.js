@@ -57,18 +57,75 @@ angular.module("aFilePicker", [])
 
 			if(event.data.status == 200 || event.data.status == 204){
 				enable_scroll();
-				className(aFilePicker, 'picker-hide');
+				try{
+					aFilePicker.close();
+				} catch(e){
+					aFilePicker.removeAttribute('open');
+				}
 				defered.resolve(event.data.detail);
 			}
 
 		};
-
 
 	}
 
 	function createChannel(){
 		return channel;
 	};
+
+	function instace(option){
+		delete option.progress;
+
+		var message = {
+			detail: option,
+			eventName: "aFilePicker::init",
+			version: "v1"
+		}
+
+		// Try using MessageChannel first of all
+		if(win.MessageChannel){
+			var mc = new MessageChannel();
+
+	    	// initialize the picker option
+	    	aFileDialog.contentWindow.postMessage(message, origin, [mc.port2]);
+
+			// Set up our port event listener.
+			mc.port1.onmessage = messageHandler;
+
+			// Open the port
+			mc.port1.start();
+
+			emit = function (msg) {
+				msg.version = "v1";
+				mc.port1.postMessage(msg);
+			}
+		} else {
+			var channel = "aFilePicker_" + (+new Date);
+	    	// initialize the picker option
+
+	    	emit = function (msg) {
+	    		msg.version = "v1";
+	    		msg.channel = channel;
+	    		aFileDialog.contentWindow.postMessage(msg, origin);
+	    	}
+
+	    	emit(message);
+
+			// Set up our event listener.
+			window.addEventListener('message', function(event) {
+				if(event.origin = origin && event.data.channel == message.channel){
+					messageHandler(event);
+				}
+			});
+		}
+
+		// Show the filepicker dialog
+		try{
+			aFilePicker.showModal();
+		} catch(e){
+			aFilePicker.setAttribute('open', '');
+		}
+	}
 
 	function open(option) {
 		defered = $q.defer();
@@ -77,70 +134,15 @@ angular.module("aFilePicker", [])
 			aFileDialog = el("iframe", {
 				id: "aFileDialog",
 				src: origin + "/my-device",
+				// allowTransparency: true,
 				onload: function(){
-					delete option.progress;
-
-					var message = {
-						detail: option,
-						eventName: "aFilePicker::init",
-						version: "v1"
-					}
-
-					// Try using MessageChannel first of all
-					if(win.MessageChannel){
-				    	var mc = new MessageChannel();
-
-				    	// initialize the picker option
-						aFileDialog.contentWindow.postMessage(message, origin, [mc.port2]);
-
-						// Set up our port event listener.
-						mc.port1.onmessage = messageHandler;
-
-						// Open the port
-						mc.port1.start();
-
-						emit = function (msg) {
-							msg.version = "v1";
-							mc.port1.postMessage(msg);
-						}
-					} else {
-						var channel = "aFilePicker_" + (+new Date);
-				    	// initialize the picker option
-
-						emit = function (msg) {
-							msg.version = "v1";
-							msg.channel = channel;
-							aFileDialog.contentWindow.postMessage(msg, origin);
-						}
-
-						emit(message);
-
-						// Set up our event listener.
-						window.addEventListener('message', function(event) {
-							if(event.origin = origin && event.data.channel == message.channel){
-								messageHandler(event);
-							}
-						});
-					}
-
-					// Show the filepicker dialog
-					className(aFileDialog, "loaded");
+					instace(option);
 				}
-			}, aFilePicker = el("div", {
-				id: "aFilePicker",
-				onclick: function() {
-					// remove the last pulse so we can do it again
-					className(aFilePicker);
-
-					// make one pulse
-					// className() only takes 2 params so The third parameter won't realy do anything... but calculate the offsetWidth
-					// That will trigger a reflow so we don't have to make a timeout
-					className(aFilePicker, "pulse", aFilePicker.offsetWidth);
-				}
+			}, aFilePicker = el("dialog", {
+				id: "aFilePicker"
 			}, document.body));
-
 		} else {
-			className(aFilePicker);
+			instace(option);
 		}
 
 		disable_scroll();
@@ -150,8 +152,9 @@ angular.module("aFilePicker", [])
 
 	return {
 		pick: open,
-		saveAs: function(file, name) {
-
+		save: function(option) {
+			option.saveMode = true;
+			open(option);
 		}
 	};
 }])
@@ -161,45 +164,12 @@ angular.module("aFilePicker", [])
 		restrict: "A",
 		require: '^ngModel',
 		link: function($scope, $element, $attr, $ctrl) {
-			window.onresize = function(){
-				var w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-				var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
-
-				$scope.$root.w = w;
-				$scope.$root.h = h;
-				$scope.$root.$apply();
-			}
 
 			$element.on('click', function(){
-
-				aFilePicker.pick({
-					responseType: "meta", //["image", "video", "audio", "blob", "file", "meta", "base64", "dataURL", "arrayBuffer", "text", "binary", "binary-utf8", "json", "document"]
-					mimeType: "*/*",
-					zipIt: false,
-					extension: undefined,
-					container: "window", // "window" or "popup" or "css selector" or "element" (popup if third party cookie blocking is enabled)
-					maxWidth: Infinity,
-					maxHeight: Infinity,
-					language: "sv",
-					services: ["device", "facebook"],
-					maxFiles: Infinity,
-					max: Infinity,
-					min: 0,
-					totalMax: Infinity,
-					totalMin: 0,
-					directory: false,
-					progress: function(){
-
-					}
-				}).then(function(files) {
+				aFilePicker.pick($scope.$eval($attr.aFilePicker) || {}).then(function(files) {
 					$ctrl.$setViewValue(files);
 					$ctrl.$render();
-					// $ctrl.$modelValue = files;
-					// $element.triggerHandler('input');
-				}, function(error){
-					console.log(error);
 				});
-
 			});
 
 		}
