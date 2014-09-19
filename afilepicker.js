@@ -1,3 +1,5 @@
+(function(a){function f(b,c){var d=a.createEvent("Event");d.initEvent(b,!0,!1);c.dispatchEvent(d)}function g(d){a[c.enabled]=a[b.enabled];a[c.element]=a[b.element];f(c.events.change,d.target)}function h(a){f(c.events.error,a.target)}var b,e,d={w3:{enabled:"fullscreenEnabled",element:"fullscreenElement",request:"requestFullscreen",exit:"exitFullscreen",events:{change:"fullscreenchange",error:"fullscreenerror"}},webkit:{enabled:"webkitIsFullScreen",element:"webkitCurrentFullScreenElement",request:"webkitRequestFullScreen",exit:"webkitCancelFullScreen",events:{change:"webkitfullscreenchange",error:"webkitfullscreenerror"}},moz:{enabled:"mozFullScreen",element:"mozFullScreenElement",request:"mozRequestFullScreen",exit:"mozCancelFullScreen",events:{change:"mozfullscreenchange",error:"mozfullscreenerror"}},ms:{enabled:"msFullscreenEnabled",element:"msFullscreenElement",request:"msRequestFullscreen",exit:"msExitFullscreen",events:{change:"MSFullscreenChange",error:"MSFullscreenError"}}},c=d.w3;for(e in d)if(d[e].enabled in a){b=d[e];break}c.enabled in a||!b||(a.addEventListener(b.events.change,g,!1),a.addEventListener(b.events.error,h,!1),a[c.enabled]=a[b.enabled],a[c.element]=a[b.element],a[c.exit]=a[b.exit],Element.prototype[c.request]=function(){return this[b.request].apply(this,arguments)});return b})(document);
+
 !function(){
 
 angular.module("aFilePicker", [])
@@ -5,7 +7,8 @@ angular.module("aFilePicker", [])
 .service("aFilePicker", ["$q", function($q) {
 
 	var onlyPostMsgString = !function(a){try{postMessage({toString:function(){a=1}},"*")}catch(e){}return!a}(),
-		origin = "https://afilepicker.eu01.aws.af.cm",
+		// origin = "https://afilepicker.eu01.aws.af.cm",
+		origin = "https://app.afilepicker.com",
 		win = window,
 		doc = document,
 		usingMsgChannel = !!win.MessageChannel,
@@ -49,9 +52,20 @@ angular.module("aFilePicker", [])
 	    window.onmousewheel = document.onmousewheel = null;
 	}
 
-	var curr, len, arr;
+	// window.Source = Source;
+
+	var hash = {}, curr, len, arr, id=0;
+
+	function nextUID(){
+		return id++;
+	}
 
 	function messageHandler(event) {
+		if(typeof event.data.eventName === 'number'){
+			hash[event.data.eventName](event.data.detail);
+			delete hash[event.data.eventName];
+			return
+		}
 
 		if(event.data.eventName == "aFilePicker::close") {
 
@@ -62,7 +76,35 @@ angular.module("aFilePicker", [])
 				} catch(e){
 					aFilePicker.removeAttribute('open');
 				}
-				defered.resolve(event.data.detail);
+
+				function Read(id){
+					this.id = id;
+				};
+
+				Read.prototype.emit = emit;
+
+				Read.prototype.start = function(readAs, range, cb) {
+					var callbackId = nextUID();
+					hash[callbackId] = cb;
+
+					this.emit({
+						detail: {
+							id: this.id,
+							range: range || "0-",
+							readAs: readAs || "Blob",
+							onload: callbackId
+						},
+						eventName: "aFilePicker::FileReader"
+					});
+				};
+
+				var sources = event.data.detail.map(function(source){
+					source.getFile = (new Read(source.id));
+					delete source.id;
+					return source;
+				});
+
+				defered.resolve(sources);
 			}
 
 		};
@@ -144,6 +186,8 @@ angular.module("aFilePicker", [])
 		} else {
 			instace(option);
 		}
+
+		(screen.width < 800 || screen.height < 500) && aFileDialog.requestFullscreen();
 
 		disable_scroll();
 
