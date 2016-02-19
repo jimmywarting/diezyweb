@@ -5,7 +5,7 @@ angular.module("aFilePicker", [])
 .service("aFilePicker", ["$q", function($q) {
 
 	var onlyPostMsgString = !function(a){try{postMessage({toString:function(){a=1}},"*")}catch(e){}return!a}(),
-		origin = "https://afilepicker.eu01.aws.af.cm",
+		origin = "https://afilepicker.github.io",
 		win = window,
 		doc = document,
 		usingMsgChannel = !!win.MessageChannel,
