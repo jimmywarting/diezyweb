@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<style>
+		@import url(css/style.css);
+		/*@import url(css/afilepicker.css);*/
+
+		/* Make the hole background black (since it's hard to simulate a border around the arrow head)*/
+		#breadcrumb {
+			width: 100%;
+			text-align: left;
+		  display: inline-block;
+		  padding: 1px;
+		  padding-right: 18px;
+		  -webkit-clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%);
+		  clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%);
+		}
+
+		#breadcrumb a {
+		  display: inline-block;
+		  color: black;
+		  padding: 5px 30px 5px 30px;
+		  position: relative;
+		  text-decoration: none;
+		  -webkit-clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%, 15px 50%);
+		  clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%, 15px 50%);
+		  margin-right: -11px;
+		}
+
+		/* first link should not have anything cliped on the left side */
+		#breadcrumb a:first-child {
+		  -webkit-clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%);
+		  clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%);
+		  padding-left: 20px;
+		}
+
+
+		body {
+			background: #6a3093;
+			background: -webkit-linear-gradient(to left, #6a3093 , #a044ff);
+			background: linear-gradient(to left, #6a3093 , #a044ff);
+			font-family: "MuseoSansCyrl-100", Myriad Pro, Arial, sans-serif;
+			color: #fff;
+		}
+		html, body, main {
+			margin: 0;
+			height: 100%;
+		}
+
+		li {
+			position: relative;
+			margin-left: -15px;
+			list-style: none;
+		}
+
+		.myButton {
+			-moz-box-shadow:inset 0px 1px 0px 0px #e184f3;
+			-webkit-box-shadow:inset 0px 1px 0px 0px #e184f3;
+			box-shadow:inset 0px 1px 0px 0px #e184f3;
+			background-color:#c123de;
+			-moz-border-radius:6px;
+			-webkit-border-radius:6px;
+			border-radius:6px;
+			border:1px solid #a511c0;
+			display:inline-block;
+			cursor:pointer;
+			color:#ffffff;
+			font-family:Arial;
+			font-size:15px;
+			font-weight:bold;
+			padding:6px 24px;
+			text-decoration:none;
+			text-shadow:0px 1px 0px #9b14b3;
+		}
+		.myButton:hover {
+			background-color:#a20dbd;
+		}
+		.myButton:active {
+			position:relative;
+			top:1px;
+		}
+
+		.flex-container {
+			display: flex;
+			flex-direction: row;
+			flex-wrap: nowrap;
+			justify-content: center;
+			align-content: stretch;
+			align-items: center;
+			text-align: center;
+		}
+
+		.flex-item:nth-child(1) {
+			flex: 1
+		}
+
+		.flex-item:nth-child(2) {
+			flex: 2
+		}
+
+		.flex-item:nth-child(3) {
+			flex: 1
+		}
+		.tree {
+			height: 90%;
+			overflow: scroll;
+		}
+
+		.fade-in {
+			animation: fadein 7s;
+		}
+
+		svg path {
+			animation: fadeer .750s;
+		}
+
+		svg .transition-remove {
+			animation: transition-remove-animation .750s;
+		}
+
+		@keyframes fadein {
+			0%   {opacity:0; margin-top: -165px; visibility: hidden;}
+		    60%  {opacity:0; margin-top: -165px; visibility: hidden;}
+		    75%  {opacity:0; margin-top: 0; visibility: hidden;}
+		    100% {opacity:1; margin-top: 0;}
+		}
+
+		@keyframes fadeer {
+			0%   {fill-opacity: 0;}
+			100% {fill-opacity: 1;}
+		}
+
+		@keyframes transition-remove-animation {
+			0%   {fill-opacity: 1;}
+			100% {fill-o<pacity: 0;}
+		}
+
+		::-webkit-scrollbar {
+		  width: 7px;
+		  height: 7px;
+		}
+		::-webkit-scrollbar-button {
+		  width: 0px;
+		  height: 0px;
+		}
+		::-webkit-scrollbar-thumb {
+		  background: #7315bf;
+		  border: 44px none #ffffff;
+		  border-radius: 50px;
+		}
+		::-webkit-scrollbar-thumb:hover {
+		  background: #c123de;
+		}
+		::-webkit-scrollbar-thumb:active {
+		  background: #ff40ff;
+		}
+		::-webkit-scrollbar-track {
+		  background: transparent;
+		  border: 35px none #ffffff;
+		  border-radius: 50px;
+		}
+		::-webkit-scrollbar-track:hover {
+		  background: transparent;
+		}
+		::-webkit-scrollbar-track:active {
+		  background: #333333;
+		}
+		::-webkit-scrollbar-corner {
+		  background: transparent;
+		}
+	</style>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js" integrity="sha384-V6/dyDFv85/V/Ktq3ez5B80/c9ZY7jV9c/319rqwNOz3h9CIPdd2Eve0UQBYMMr/" crossorigin="anonymous"></script>
+
+</head>
+<body x-contextmenu="supermenu" ng-app="wis" ng-controller="MainCtrl as Main">
+
+	<main class="flex-container" wis-dropzone ng-if="!Main.root">
+		<h1 class="flex-item">Drag & Drop<br>your folder here</h1>
+	</main>
+	<main class="flex-container" ng-if="Main.root">
+		<ol class="flex-item tree" ng-if="Main.root" style="text-align: left">
+			{{Main.data.name}} {{Main.data.sum | filesize}}
+			<li ng-repeat="data in Main.root.children" ng-include="'tree_item_renderer'"></li>
+		</ol>
+		<div class="flex-item" id="$$svg">
+			<button class="myButton">
+				Scaning files...<br>Might take a while
+			</button>
+			<div class="fade-in">
+				<p>I hope you are pleased with the outcome.<br>
+					And that you find what took all that space away<br>
+					...that made you not having to buy a larger HDD<br>
+					or paying for a malicious program that needs to be installed to do just this<br>
+					And that you enjoy a ad-free service.</p>
+				<p>Meanwhile... Would you be willing to donate?</p>
+				<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank" style="text-align: center" class="ng-pristine ng-valid">
+					<input type="hidden" name="cmd" value="_s-xclick">
+					<input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----">
+					<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+					<img alt="" border="0" src="https://www.paypalobjects.com/sv_SE/i/scr/pixel.gif" width="1" height="1">
+				</form>
+			</div>
+		</div>
+		<div class="flex-item"></div>
+	</main>
+
+	<script type="text/ng-template" id="tree_item_renderer">
+		<li ng-click="data.open = !data.open">
+			<span ng-if="data.children">></span>
+			<img ng-if="!data.done && data.children" src="https://rem-fit.com/user_data/styles//images/pre_loader_2.gif" alt="syncing" height="16">
+			{{data.name}}
+		</li>
+		<ol>
+			<li ng-if="$parent.$parent.data.open" ng-repeat="data in data.children" ng-include="'tree_item_renderer'"></li>
+		</ol>
+	</script>
+
+	<menu type="context" id="supermenu">
+		<menuitem label="rotate" onclick="rotate()"></menuitem>
+		<menuitem label="resize" onclick="resize()"></menuitem>
+		<menu label="share">
+			<menuitem label="twitter" onclick="alert('foo')"></menuitem>
+			<menuitem label="facebook" onclick="alert('bar')"></menuitem>
+		</menu>
+	</menu>
+
+	<script>
+		window.rotate = evt => console.log(evt)
+	</script>
+	<script src="https://d3js.org/d3.v3.js" integrity="sha384-DYPaDteZpWU4XS8q5a8eeBRmWHK3zisWfLJxpF2AKel3DnhPsQTeZdz1uEDkuDOV" crossorigin="anonymous"></script>
+	<script src="https://d3js.org/colorbrewer.v1.min.js" integrity="sha384-XtfXFVqU4CeRvHV+8CcOXTIsS8WZdK/HHXgzxZ4LwBUvPc0Ba3xwom/I6XUW7P4/" crossorigin="anonymous"></script>
+	<!-- <script src="https://cdn.rawgit.com/creatorrr/web-streams-polyfill/68f93d7240d925d27b175ce39133f57993c3f109/dist/polyfill.min.js"></script>
+	<script src="https://cdn.rawgit.com/jimmywarting/Screw-FileReader/master/index.js"></script> -->
+	<script src="js/app.js"></script>

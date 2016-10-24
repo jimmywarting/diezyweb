@@ -1,0 +1,169 @@
+
+<!DOCTYPE html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<style>
+		@import url("css/flexboxgrid.css");
+
+		main, html, body{
+			height: 100%;
+			margin: 0 !important;
+			padding: 0 !important;
+			display: block;
+			background-color: #fff;
+			font-family: "MuseoSansCyrl-100", Myriad Pro, Arial, sans-serif;
+		}
+
+		main {
+			color: white;
+			background: url(img/23.jpg) no-repeat;
+			background-size: 100% 100%;
+			background-size: cover;
+		}
+
+		section {
+			/*background: rgba(34, 34, 48, 0.4);*/
+			max-width: 1200px;
+			margin: 0 auto 60px;
+			padding: 30px;
+		}
+
+		/*div{background: rgba(255,0,0,.3)}*/
+
+		nav a {
+			display: inline-block;
+			padding: 25px 12px 35px 18px;
+			text-transform: uppercase;
+			text-decoration: none;
+			color: #1ac8f9;
+			font-size: 17px;
+			font-family: "MuseoSansCyrl-500", Myriad Pro, Arial, sans-serif;
+			font-weight: normal;
+		}
+
+		img {
+			max-width: 100%;
+			max-height: 100%;
+			height: auto;
+		}
+
+		.flex-container {
+			max-width: 1200px;
+			margin: 0 auto;
+		}
+		h1{
+			margin: 0;
+		}
+
+
+		.myButton {
+			-moz-box-shadow:inset 0px 1px 0px 0px #e184f3;
+			-webkit-box-shadow:inset 0px 1px 0px 0px #e184f3;
+			box-shadow:inset 0px 1px 0px 0px #e184f3;
+			background-color:#c123de;
+			-moz-border-radius:6px;
+			-webkit-border-radius:6px;
+			border-radius:6px;
+			border:1px solid #a511c0;
+			display:inline-block;
+			cursor:pointer;
+			color:#ffffff;
+			font-family:Arial;
+			font-size:15px;
+			font-weight:bold;
+			padding:6px 24px;
+			text-decoration:none;
+			text-shadow:0px 1px 0px #9b14b3;
+		}
+		.myButton:hover {
+			background-color:#a20dbd;
+		}
+		.myButton:active {
+			position:relative;
+			top:1px;
+		}
+
+		.input {
+			box-sizing: border-box;
+			width: 100%;
+			padding: 17px 18px;
+			font-size: 25px;
+			border: 1px solid rgba(161, 161, 175, 0.4);
+			background-color: rgba(45, 45, 64, 0.7);
+			color: #a1a1af;
+			border-radius: 5px;
+		}
+	</style>
+
+</head>
+<body ng-controller="ListCtrl as list">
+
+	<main>
+		<div class="flex-container" style="height: 100%;">
+			<div class="flex-item">
+				<!-- <h1>WobblyDisk</h1> -->
+			</div>
+			<div class="flex-item" style="position: relative;">
+				<div class="flex-item-jumbo"></div>
+				<div class="flex-item-jumbo"  style="position: relative;">
+					<div>
+						<h1>Scan your disk!<br><small>Find out what takes space!</small></h1>
+						<small>(No installation, Works right from your browser)</small><br><br>
+						<a href="/scan" class="myButton">Begin here</a>
+
+					</div>
+				</div>
+			</div>
+			<div class="flex-item"><a href="#introduction">&#9662;</a></div>
+		</div>
+	</main>
+
+	<section id="introduction">
+		<p style="text-align: center">The Wobbly Disk is a 100% free online service. It will scan any directory you throw at it and show you what is taking up space.</p>
+	</section>
+
+	<section class="flex-container-1-3">
+		<div class="flex-item-1-3">
+			<picture>
+				<source type="image/webp" srcset="img/owl-question.webp">
+				<source type="image/png" srcset="img/owl-question.png">
+				<img src="img/owl-question.png">
+			</picture>
+		</div>
+		<div class="flex-item-1-3">
+			<h3>Why Diezyweb?</h3>
+			<dl>
+				<dt>It's safe</dt>
+				<dd>Nothing can be deleted. The browser have only read access to what you want to scan.</dd>
+				<dd>No Scary OS prompts popup that warn you about installing drivers/applications from the Internet.</dd>
+				<dd>Nothing about you gets shared. Privacy is important!</dd>
+				<dd>There is no ads that tracks you around the web!<br><br></dd>
+				<dt>Absolute 100% Free</dt>
+				<dd>Internet was built for sharing.</dd>
+				<dd>We don't want to see cracked service with malicious code. So we open up.<br><br></dd>
+				<dt>You save money</dt>
+				<dd>Instead of buying more space you can find out what is taking up space</dd>
+			</dl>
+		</div>
+	</section>
+
+	<section class="flex-container-1-3">
+		<div class="flex-item-1-3">
+			<picture>
+				<source type="image/webp" srcset="img/github.webp">
+				<source type="image/gif" srcset="img/github.gif">
+				<img src="img/github.gif">
+			</picture>
+		</div>
+		<div class="flex-item-1-3">
+			<h3>Avalible as open source on github</h3>
+			<p>We value open source and believe it is a privilege to be able to share idea-as-code with people around the world as we work together to build useful tools and products. We believe in building on the shoulders of giants and seek for productive, sustainable ways to continue to strengthen the foundation and create the architecture of the future.</p>
+			<ul>
+				<li><a href="https://github.com/jimmywarting/ofc/fork">Fork</a></li>
+				<li><a href="https://github.com/jimmywarting/ofc/">Make a pull request</a></li>
+				<li><a href="https://github.com/jimmywarting/ofc/issues">Send issue and ideas</a></li>
+			</ul>
+		</div>
+	</section>
