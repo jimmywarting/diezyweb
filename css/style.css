@@ -1,0 +1,60 @@
+[ng-click]{
+	cursor: pointer;
+}
+
+path {
+	fill-rule: evenodd;
+}
+/* For modern browsers */
+.clearfix:before,
+.clearfix:after {
+		content:"";
+		display:table;
+}
+.folder{
+	background: gainsboro;
+}
+.clearfix:after {
+	clear:both;
+}
+
+svg{
+	float: left;
+}
+ul{
+	float: right;
+	width: 700px;
+}
+ul span {
+	float: right;
+}
+article, aside, figure, footer, header, hgroup,
+menu, nav, section { display: block; }
+
+/* Make the hole background black (since it's hard to simulate a border around the arrow head)*/
+#$$breadcrumb {
+  background: black;
+  display: inline-block;
+  padding: 1px;
+  padding-right: 18px;
+  -webkit-clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%);
+  clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%);
+}
+
+#$$breadcrumb a {
+  display: inline-block;
+  background: gray;
+  padding: 5px 30px 5px 30px;
+  position: relative;
+  text-decoration: none;
+  -webkit-clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%, 15px 50%);
+  clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%, 15px 50%);
+  margin-right: -17px;
+}
+
+/* first link should not have anything cliped on the left side */
+#$$breadcrumb a:first-child {
+  -webkit-clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%);
+  clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%);
+  padding-left: 20px;
+}

@@ -1,18 +1,15 @@
-(function(a){function f(b,c){var d=a.createEvent("Event");d.initEvent(b,!0,!1);c.dispatchEvent(d)}function g(d){a[c.enabled]=a[b.enabled];a[c.element]=a[b.element];f(c.events.change,d.target)}function h(a){f(c.events.error,a.target)}var b,e,d={w3:{enabled:"fullscreenEnabled",element:"fullscreenElement",request:"requestFullscreen",exit:"exitFullscreen",events:{change:"fullscreenchange",error:"fullscreenerror"}},webkit:{enabled:"webkitIsFullScreen",element:"webkitCurrentFullScreenElement",request:"webkitRequestFullScreen",exit:"webkitCancelFullScreen",events:{change:"webkitfullscreenchange",error:"webkitfullscreenerror"}},moz:{enabled:"mozFullScreen",element:"mozFullScreenElement",request:"mozRequestFullScreen",exit:"mozCancelFullScreen",events:{change:"mozfullscreenchange",error:"mozfullscreenerror"}},ms:{enabled:"msFullscreenEnabled",element:"msFullscreenElement",request:"msRequestFullscreen",exit:"msExitFullscreen",events:{change:"MSFullscreenChange",error:"MSFullscreenError"}}},c=d.w3;for(e in d)if(d[e].enabled in a){b=d[e];break}c.enabled in a||!b||(a.addEventListener(b.events.change,g,!1),a.addEventListener(b.events.error,h,!1),a[c.enabled]=a[b.enabled],a[c.element]=a[b.element],a[c.exit]=a[b.exit],Element.prototype[c.request]=function(){return this[b.request].apply(this,arguments)});return b})(document);
-
 !function(){
-var win = window;
 
 angular.module("aFilePicker", [])
 
 .service("aFilePicker", ["$q", function($q) {
 
 	var onlyPostMsgString = !function(a){try{postMessage({toString:function(){a=1}},"*")}catch(e){}return!a}(),
-		origin = "https://afilepicker.github.io/#",
+		origin = "https://afilepicker.github.io",
+		win = window,
 		doc = document,
 		usingMsgChannel = !!win.MessageChannel,
 		defered,
-		emit,
 		aFilePicker,
 		aFileDialog;
 
@@ -51,122 +48,19 @@ angular.module("aFilePicker", [])
 	    window.onmousewheel = document.onmousewheel = null;
 	}
 
-	// window.Source = Source;
-
-	var hash = {}, curr, len, arr, id=0;
-
-	function nextUID(){
-		return id++;
-	}
 
 	function messageHandler(event) {
-		if(typeof event.data.eventName === 'number'){
-			hash[event.data.eventName](event.data.detail);
-			delete hash[event.data.eventName];
-			return
+		if(event.data.status == 200){
+			enable_scroll();
+			className(aFilePicker, 'picker-hide');
+			defered.resolve(event.data.detail);
+			event.target.removeEventListener(messageHandler);
 		}
-
-		if(event.data.eventName == "aFilePicker::close") {
-
-			if(event.data.status == 200 || event.data.status == 204){
-				enable_scroll();
-				try{
-					aFilePicker.close();
-				} catch(e){
-					aFilePicker.removeAttribute('open');
-				}
-
-				function Read(id){
-					this.id = id;
-				};
-
-				Read.prototype.emit = emit;
-
-				Read.prototype.start = function(readAs, range, cb) {
-					var callbackId = nextUID();
-					hash[callbackId] = cb;
-
-					this.emit({
-						detail: {
-							id: this.id,
-							range: range || "0-",
-							readAs: readAs || "Blob",
-							onload: callbackId
-						},
-						eventName: "aFilePicker::FileReader"
-					});
-				};
-
-				var sources = event.data.detail.map(function(source){
-					source.getFile = (new Read(source.id));
-					delete source.id;
-					return source;
-				});
-
-				defered.resolve(sources);
-			}
-
-		};
-
 	}
 
 	function createChannel(){
 		return channel;
 	};
-
-	function instace(option){
-		delete option.progress;
-
-		var message = {
-			detail: option,
-			eventName: "aFilePicker::init",
-			version: "v1"
-		}
-
-		// Try using MessageChannel first of all
-		if(win.MessageChannel){
-			var mc = new MessageChannel();
-
-	    	// initialize the picker option
-	    	aFileDialog.contentWindow.postMessage(message, origin, [mc.port2]);
-
-			// Set up our port event listener.
-			mc.port1.onmessage = messageHandler;
-
-			// Open the port
-			mc.port1.start();
-
-			emit = function (msg) {
-				msg.version = "v1";
-				mc.port1.postMessage(msg);
-			}
-		} else {
-			var channel = "aFilePicker_" + (+new Date);
-	    	// initialize the picker option
-
-	    	emit = function (msg) {
-	    		msg.version = "v1";
-	    		msg.channel = channel;
-	    		aFileDialog.contentWindow.postMessage(msg, origin);
-	    	}
-
-	    	emit(message);
-
-			// Set up our event listener.
-			window.addEventListener('message', function(event) {
-				if(event.origin = origin && event.data.channel == message.channel){
-					messageHandler(event);
-				}
-			});
-		}
-
-		// Show the filepicker dialog
-		try{
-			aFilePicker.showModal();
-		} catch(e){
-			aFilePicker.setAttribute('open', '');
-		}
-	}
 
 	function open(option) {
 		defered = $q.defer();
@@ -175,18 +69,64 @@ angular.module("aFilePicker", [])
 			aFileDialog = el("iframe", {
 				id: "aFileDialog",
 				src: origin + "/my-device",
-				// allowTransparency: true,
 				onload: function(){
-					instace(option);
-				}
-			}, aFilePicker = el("dialog", {
-				id: "aFilePicker"
-			}, document.body));
-		} else {
-			instace(option);
-		}
+					delete option.progress;
 
-		(screen.width < 800 || screen.height < 500) && aFileDialog.requestFullscreen();
+					var message = {
+						detail: option,
+						eventName: "aFilePicker::init",
+						version: "v1"
+					}
+
+
+					// Try using MessageChannel first of all
+					if(win.MessageChannel){
+				    	var mc = new MessageChannel();
+
+				    	// initialize the picker option
+						aFileDialog.contentWindow.postMessage(message, origin, [mc.port2]);
+
+						// Set up our port event listener.
+						mc.port1.addEventListener('message', messageHandler, false);
+
+						// Open the port
+						mc.port1.start();
+					} else {
+						message.channel = "aFilePicker_" + (+new Date);
+
+				    	// initialize the picker option
+						aFileDialog.contentWindow.postMessage(message, origin);
+
+						// Set up our event listener.
+						window.addEventListener('message', function(event) {
+							if(event.origin = origin && event.data.channel == message.channel){
+								messageHandler(event);
+							}
+						});
+					}
+
+					// Show the filepicker dialog
+					className(aFileDialog, "loaded");
+				}
+			}, aFilePicker = el("div", {
+				id: "aFilePicker",
+				onclick: function() {
+					// remove the last pulse so we can do it again
+					className(aFilePicker);
+
+					// make one pulse
+					// className() only takes 2 params so The third parameter won't realy do anything... but calculate the offsetWidth
+					// That will trigger a reflow so we don't have to make a timeout
+					className(aFilePicker, "pulse", aFilePicker.offsetWidth);
+				}
+			}, document.body));
+
+
+			// aFileDialog.webkitRequestFullscreen();
+
+		} else {
+			className(aFilePicker);
+		}
 
 		disable_scroll();
 
@@ -195,9 +135,8 @@ angular.module("aFilePicker", [])
 
 	return {
 		pick: open,
-		save: function(option) {
-			option.saveMode = true;
-			open(option);
+		saveAs: function(file, name) {
+
 		}
 	};
 }])
@@ -207,12 +146,45 @@ angular.module("aFilePicker", [])
 		restrict: "A",
 		require: '^ngModel',
 		link: function($scope, $element, $attr, $ctrl) {
+			window.onresize = function(){
+				var w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+				var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+
+				$scope.$root.w = w;
+				$scope.$root.h = h;
+				$scope.$root.$apply();
+			}
 
 			$element.on('click', function(){
-				aFilePicker.pick($scope.$eval($attr.aFilePicker) || {}).then(function(files) {
+
+				aFilePicker.pick({
+					responseType: "blob", //["image", "video", "audio", "blob", "meta", "base64", "dataURL", "arrayBuffer", "text", "binary", "binary-utf8", "json", "document"]
+					mimeType: "*/*",
+					zipIt: false,
+					extension: undefined,
+					container: "window", // "window" or "popup" or "css selector" or "element" (popup if third party cookie blocking is enabled)
+					maxWidth: Infinity,
+					maxHeight: Infinity,
+					language: "sv",
+					services: ["device", "facebook"],
+					maxFiles: Infinity,
+					max: Infinity,
+					min: 0,
+					totalMax: Infinity,
+					totalMin: 0,
+					directory: false,
+					progress: function(){
+
+					}
+				}).then(function(files) {
 					$ctrl.$setViewValue(files);
 					$ctrl.$render();
+					// $ctrl.$modelValue = files;
+					// $element.triggerHandler('input');
+				}, function(error){
+					console.log(error);
 				});
+
 			});
 
 		}
